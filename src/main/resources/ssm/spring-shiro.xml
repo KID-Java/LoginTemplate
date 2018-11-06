@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/login"/>
+        <property name="unauthorizedUrl" value="/views/errors/403.jsp"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /login = anon
+                /subLogin = anon
+                /vcode = anon
+                /getPubKey = anon
+                /* = authc
+            </value>
+        </property>
+
+    </bean>
+
+    <!--构建shiro环境-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="realm"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="sessionManager" ref="sessionManager"/>
+
+    </bean>
+    <!--自定义缓存管理器-->
+    <bean id="cacheManager" class="cn.linguolai.template.cache.ShiroRedisCacheManager"/>
+    <!--自定义sessionDao-->
+    <bean id="sessionDao" class="cn.linguolai.template.session.ShiroRedisSessionDao"/>
+    <!--自定义Session管理器-->
+    <bean id="sessionManager" class="cn.linguolai.template.session.ShiroRedisSessionManager">
+        <property name="sessionDAO" ref="sessionDao"/>
+    </bean>
+    <!--<bean id="defaultWebSessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">-->
+        <!--<property name="sessionDAO" ref="sessionDao"/>-->
+    <!--</bean>-->
+
+    <!--创建自定的Reaml-->
+    <bean id="realm" class="cn.linguolai.template.shiro.Realm.CustomRealm">
+        <property name="credentialsMatcher" ref="hashedCredentialsMatcher"/>
+    </bean>
+
+    <!--md5 加密-->
+    <bean id="hashedCredentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="md5"/>
+        <property name="hashIterations" value="1"/>
+    </bean>
+
+
+
+
+</beans>
